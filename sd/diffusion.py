@@ -3,6 +3,7 @@ from torch import nn
 from torch.nn import functional as F
 from attention import SelfAttention, CrossAttention
 
+# Step2: Something to encode the time step for where we are
 class TimeEmbedding(nn.Module):
     def __init__(self, n_embd):
         super().__init__()
@@ -185,18 +186,28 @@ class Upsample(nn.Module):
 class SwitchSequential(nn.Sequential):
     def forward(self, x, context, time):
         for layer in self:
+
+            # If it is unet attention: Compute cross attention between 
+            # the latent and the input prompt/context/text
             if isinstance(layer, UNET_AttentionBlock):
                 x = layer(x, context)
+            # match the latent with the time step
             elif isinstance(layer, UNET_ResidualBlock):
                 x = layer(x, time)
             else:
                 x = layer(x)
         return x
 
+# Step3: Unet 
+# the output of each layer in Unet is connected to the decoder side
 class UNET(nn.Module):
     def __init__(self):
         super().__init__()
+
+        # Residual block and Attention blocks are similar to VAE
         self.encoders = nn.ModuleList([
+
+            # Start with the latent representation of the noise (H/8*W/8)
             # (Batch_Size, 4, Height / 8, Width / 8) -> (Batch_Size, 320, Height / 8, Width / 8)
             SwitchSequential(nn.Conv2d(4, 320, kernel_size=3, padding=1)),
             
@@ -245,7 +256,11 @@ class UNET(nn.Module):
             UNET_ResidualBlock(1280, 1280), 
         )
         
+        # Predict the noise
         self.decoders = nn.ModuleList([
+
+            # 2560 here because the skip connection from the encoder/bottleneck
+            # 1280 + 1280 = 2560
             # (Batch_Size, 2560, Height / 64, Width / 64) -> (Batch_Size, 1280, Height / 64, Width / 64)
             SwitchSequential(UNET_ResidualBlock(2560, 1280)),
             
@@ -324,6 +339,7 @@ class UNET_OutputLayer(nn.Module):
         # (Batch_Size, 4, Height / 8, Width / 8) 
         return x
 
+# Step1
 class Diffusion(nn.Module):
     def __init__(self):
         super().__init__()
@@ -336,12 +352,17 @@ class Diffusion(nn.Module):
         # context: (Batch_Size, Seq_Len, Dim)
         # time: (1, 320)
 
+        # positional embedding
         # (1, 320) -> (1, 1280)
         time = self.time_embedding(time)
         
+        
+        # input: takes the output of the VAE encoder
+        # output: does not change the latent representation
         # (Batch, 4, Height / 8, Width / 8) -> (Batch, 320, Height / 8, Width / 8)
         output = self.unet(latent, context, time)
         
+        # Takes the output of the unet and returns back to the original size of the unet's input
         # (Batch, 320, Height / 8, Width / 8) -> (Batch, 4, Height / 8, Width / 8)
         output = self.final(output)
         
