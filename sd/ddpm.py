@@ -128,4 +128,10 @@ class DDPMSampler:
 
         
 
-    
+    def predict_x0(self, x_t, noise_pred, timestep):
+        alpha_t = self.alphas_cumprod[timestep]
+        sqrt_alpha_t = torch.sqrt(alpha_t)
+        sqrt_one_minus_alpha_t = torch.sqrt(1 - alpha_t)
+
+        x0 = (x_t - sqrt_one_minus_alpha_t * noise_pred) / sqrt_alpha_t
+        return x0

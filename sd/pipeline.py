@@ -143,6 +143,32 @@ def generate(
             # (Batch_Size, 4, Latents_Height, Latents_Width) -> (Batch_Size, 4, Latents_Height, Latents_Width)
             latents = sampler.step(timestep, latents, model_output)
 
+            # #############
+            # # Hossam debug
+            # VAE Decoder to get the image
+            # if timestep % 200 == 0:
+            #     decoder = models["decoder"]
+            #     decoder.to(device)
+
+            #     # Denoised image prediction
+            #     pred_x0 = sampler.predict_x0(latents, model_output, timestep)
+            #     my_images = decoder(pred_x0)   # safe to call multiple times
+
+            #     my_images = rescale(my_images, (-1, 1), (0, 255), clamp=True)
+            #     # (Batch_Size, Channel, Height, Width) -> (Batch_Size, Height, Width, Channel)
+            #     my_images = my_images.permute(0, 2, 3, 1)
+            #     my_images = my_images.to("cpu", torch.uint8).numpy()
+            #     from PIL import Image
+
+            #     # Convert the NumPy array to a Pillow Image object
+            #     my_pil_image = Image.fromarray(my_images[0])
+
+            #     # Save the image to a file
+            #     # The format is determined by the file extension (e.g., .png, .jpg, .bmp)
+            #     print(f"Current_timestep: {timestep}")
+            #     my_pil_image.save(f"my_output_image_{timestep}.png")
+            # #############
+
         to_idle(diffusion)
 
         decoder = models["decoder"]
@@ -157,6 +183,8 @@ def generate(
         # (Batch_Size, Channel, Height, Width) -> (Batch_Size, Height, Width, Channel)
         images = images.permute(0, 2, 3, 1)
         images = images.to("cpu", torch.uint8).numpy()
+
+    
         return images[0]
     
 def rescale(x, old_range, new_range, clamp=False):
