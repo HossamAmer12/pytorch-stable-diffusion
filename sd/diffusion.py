@@ -24,6 +24,7 @@ class TimeEmbedding(nn.Module):
 
         return x
 
+# 
 class UNET_ResidualBlock(nn.Module):
     def __init__(self, in_channels, out_channels, n_time=1280):
         super().__init__()
@@ -111,6 +112,7 @@ class UNET_AttentionBlock(nn.Module):
         # (Batch_Size, Features, Height, Width) -> (Batch_Size, Features, Height * Width)
         x = x.view((n, c, h * w))
         
+        # Take the dmodel at the end
         # (Batch_Size, Features, Height * Width) -> (Batch_Size, Height * Width, Features)
         x = x.transpose(-1, -2)
         
@@ -132,10 +134,11 @@ class UNET_AttentionBlock(nn.Module):
         residue_short = x
 
         # Normalization + Cross-Attention with skip connection
-        
+        # Prelayer norm and attention like transformers
         # (Batch_Size, Height * Width, Features) -> (Batch_Size, Height * Width, Features)
         x = self.layernorm_2(x)
         
+        # Cross attention with x and text input
         # (Batch_Size, Height * Width, Features) -> (Batch_Size, Height * Width, Features)
         x = self.attention_2(x, context)
         
@@ -150,6 +153,7 @@ class UNET_AttentionBlock(nn.Module):
         # (Batch_Size, Height * Width, Features) -> (Batch_Size, Height * Width, Features)
         x = self.layernorm_3(x)
         
+        # Feedforward layer like the transformer at the end
         # GeGLU as implemented in the original code: https://github.com/CompVis/stable-diffusion/blob/21f890f9da3cfbeaba8e2ac3c425ee9e998d5229/ldm/modules/attention.py#L37C10-L37C10
         # (Batch_Size, Height * Width, Features) -> two tensors of shape (Batch_Size, Height * Width, Features * 4)
         x, gate = self.linear_geglu_1(x).chunk(2, dim=-1) 
@@ -323,7 +327,7 @@ class UNET(nn.Module):
         
         return x
 
-# Step6
+# Step6: # Takes the output of the unet and returns back to the original size of the unet's input
 class UNET_OutputLayer(nn.Module):
     def __init__(self, in_channels, out_channels):
         super().__init__()

@@ -5,8 +5,8 @@ from ddpm import DDPMSampler
 
 WIDTH = 512
 HEIGHT = 512
-LATENTS_WIDTH = WIDTH // 8
-LATENTS_HEIGHT = HEIGHT // 8
+LATENTS_WIDTH = WIDTH // 8   ### VAE encoder width 
+LATENTS_HEIGHT = HEIGHT // 8 ### VAE encoder height
 
 def generate(
     prompt,
