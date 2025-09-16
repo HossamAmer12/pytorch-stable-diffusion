@@ -13,7 +13,7 @@ def generate(
     uncond_prompt=None,
     input_image=None,
     strength=0.8,
-    do_cfg=True,
+    do_cfg=True, # classifier free guidance
     cfg_scale=7.5,
     sampler_name="ddpm",
     n_inference_steps=50,
