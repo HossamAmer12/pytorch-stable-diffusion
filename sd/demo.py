@@ -29,7 +29,7 @@ print(models)
 prompt = "A cat stretching on the floor, highly detailed, ultra sharp, cinematic, 100mm lens, 8k resolution."
 uncond_prompt = ""  # Also known as negative prompt
 do_cfg = True
-cfg_scale = 8  # min: 1, max: 14
+cfg_scale = 8  # min: 1, max: 14 # weight of classifier free guidance
 
 ## IMAGE TO IMAGE
 

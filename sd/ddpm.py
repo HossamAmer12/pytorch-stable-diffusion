@@ -16,6 +16,7 @@ class DDPMSampler:
         self.num_train_timesteps = num_training_steps
         self.timesteps = torch.from_numpy(np.arange(0, num_training_steps)[::-1].copy())
 
+    # 1000 (Step 50).. then make groups of 50
     def set_inference_timesteps(self, num_inference_steps=50):
         self.num_inference_steps = num_inference_steps
         step_ratio = self.num_train_timesteps // self.num_inference_steps
