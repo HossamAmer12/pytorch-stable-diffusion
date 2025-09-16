@@ -257,6 +257,8 @@ class UNET(nn.Module):
         )
         
         # Predict the noise
+        # Unet residual, Unet residual, Upsample
+        # Increase the W*H of the image but decrease the number of channels
         self.decoders = nn.ModuleList([
 
             # 2560 here because the skip connection from the encoder/bottleneck
