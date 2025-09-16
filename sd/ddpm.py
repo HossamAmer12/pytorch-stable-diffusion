@@ -95,6 +95,7 @@ class DDPMSampler:
         return pred_prev_sample
     
     # q(xt|x0) = N(xt; sqrt(alpht)x0 + (1-alphatbar) I)
+    # mean and variance
     def add_noise(
         self,
         original_samples: torch.FloatTensor,
