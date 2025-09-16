@@ -43,7 +43,7 @@ def generate(
         clip.to(device)
         
         if do_cfg:
-            # Convert into a list of length Seq_Len=77
+            # Convert into a list of length Seq_Len=77 (as done in CLIP class)
             cond_tokens = tokenizer.batch_encode_plus(
                 [prompt], padding="max_length", max_length=77
             ).input_ids
@@ -116,6 +116,8 @@ def generate(
 
         timesteps = tqdm(sampler.timesteps)
         for i, timestep in enumerate(timesteps):
+
+            # like positional embedding in transformers
             # (1, 320)
             time_embedding = get_time_embedding(timestep).to(device)
 
@@ -130,10 +132,14 @@ def generate(
             # (Batch_Size, 4, Latents_Height, Latents_Width) -> (Batch_Size, 4, Latents_Height, Latents_Width)
             model_output = diffusion(model_input, context, time_embedding)
 
+            # Classifier free guidance:
+            # Inference the model once with the prompt and without prompt
+            # Combine the two how much we want to pay attention to the prompt
             if do_cfg:
                 output_cond, output_uncond = model_output.chunk(2)
                 model_output = cfg_scale * (output_cond - output_uncond) + output_uncond
-
+            
+            # Remove noise predicted by the unet
             # (Batch_Size, 4, Latents_Height, Latents_Width) -> (Batch_Size, 4, Latents_Height, Latents_Width)
             latents = sampler.step(timestep, latents, model_output)
 
@@ -141,6 +147,8 @@ def generate(
 
         decoder = models["decoder"]
         decoder.to(device)
+
+        # VAE Decoder to get the image
         # (Batch_Size, 4, Latents_Height, Latents_Width) -> (Batch_Size, 3, Height, Width)
         images = decoder(latents)
         to_idle(decoder)

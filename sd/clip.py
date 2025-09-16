@@ -72,6 +72,8 @@ class CLIPLayer(nn.Module):
 class CLIP(nn.Module):
     def __init__(self):
         super().__init__()
+
+        # Batch Size, Dim, Sequence length
         self.embedding = CLIPEmbedding(49408, 768, 77)
 
         self.layers = nn.ModuleList([
