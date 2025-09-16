@@ -94,14 +94,17 @@ class DDPMSampler:
 
         return pred_prev_sample
     
+    # q(xt|x0) = N(xt; sqrt(alpht)x0 + (1-alphatbar) I)
     def add_noise(
         self,
         original_samples: torch.FloatTensor,
         timesteps: torch.IntTensor,
     ) -> torch.FloatTensor:
+        # alphat bar
         alphas_cumprod = self.alphas_cumprod.to(device=original_samples.device, dtype=original_samples.dtype)
         timesteps = timesteps.to(original_samples.device)
 
+        # sqrt alpha
         sqrt_alpha_prod = alphas_cumprod[timesteps] ** 0.5
         sqrt_alpha_prod = sqrt_alpha_prod.flatten()
         while len(sqrt_alpha_prod.shape) < len(original_samples.shape):
