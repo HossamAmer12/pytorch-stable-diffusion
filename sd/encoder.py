@@ -82,6 +82,9 @@ class VAE_Encoder(nn.Sequential):
                 x = F.pad(x, (0, 1, 0, 1))
             
             x = module(x)
+
+        # the output of the vae encoder is mean and variance
+        # it is a multivariate Gaussian with its own mean and variance
         # (Batch_Size, 8, Height / 8, Width / 8) -> two tensors of shape (Batch_Size, 4, Height / 8, Width / 8)
         mean, log_variance = torch.chunk(x, 2, dim=1)
         # Clamp the log variance between -30 and 20, so that the variance is between (circa) 1e-14 and 1e8. 
@@ -91,7 +94,8 @@ class VAE_Encoder(nn.Sequential):
         variance = log_variance.exp()
         # (Batch_Size, 4, Height / 8, Width / 8) -> (Batch_Size, 4, Height / 8, Width / 8)
         stdev = variance.sqrt()
-        
+
+        # noise = (x - mean)/stdev
         # Transform N(0, 1) -> N(mean, stdev) 
         # (Batch_Size, 4, Height / 8, Width / 8) -> (Batch_Size, 4, Height / 8, Width / 8)
         x = mean + stdev * noise
