@@ -173,6 +173,7 @@ class UNET_AttentionBlock(nn.Module):
         # (Batch_Size, Features, Height, Width) + (Batch_Size, Features, Height, Width) -> (Batch_Size, Features, Height, Width)
         return self.conv_output(x) + residue_long
 
+# Step5
 # interpolate and scale by 2 then apply a convolution.
 class Upsample(nn.Module):
     def __init__(self, channels):
@@ -185,6 +186,7 @@ class Upsample(nn.Module):
         x = F.interpolate(x, scale_factor=2, mode='nearest') 
         return self.conv(x)
 
+# Step4
 class SwitchSequential(nn.Sequential):
     def forward(self, x, context, time):
         for layer in self:
