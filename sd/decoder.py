@@ -14,6 +14,7 @@ class VAE_AttentionBlock(nn.Module):
 
         residue = x 
 
+        # group norm due to convolution. Closer features need group norm unlike layernorm..etc
         # (Batch_Size, Features, Height, Width) -> (Batch_Size, Features, Height, Width)
         x = self.groupnorm(x)
 
