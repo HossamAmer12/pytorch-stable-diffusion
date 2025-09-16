@@ -55,6 +55,7 @@ class DDPMSampler:
         self.timesteps = self.timesteps[start_step:]
         self.start_step = start_step
 
+    # Reverese process: produces something less noisy
     def step(self, timestep: int, latents: torch.Tensor, model_output: torch.Tensor):
         t = timestep
         prev_t = self._get_previous_timestep(t)
@@ -88,6 +89,7 @@ class DDPMSampler:
             # Compute the variance as per formula (7) from https://arxiv.org/pdf/2006.11239.pdf
             variance = (self._get_variance(t) ** 0.5) * noise
         
+        # Sample from a distribution and shift the parameters of the gaussian distribution
         # sample from N(mu, sigma) = X can be obtained by X = mu + sigma * N(0, 1)
         # the variable "variance" is already multiplied by the noise N(0, 1)
         pred_prev_sample = pred_prev_sample + variance
