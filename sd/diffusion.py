@@ -173,9 +173,11 @@ class UNET_AttentionBlock(nn.Module):
         # (Batch_Size, Features, Height, Width) + (Batch_Size, Features, Height, Width) -> (Batch_Size, Features, Height, Width)
         return self.conv_output(x) + residue_long
 
+# interpolate and scale by 2 then apply a convolution.
 class Upsample(nn.Module):
     def __init__(self, channels):
         super().__init__()
+        # Convolution keeps the input and output channels
         self.conv = nn.Conv2d(channels, channels, kernel_size=3, padding=1)
     
     def forward(self, x):
