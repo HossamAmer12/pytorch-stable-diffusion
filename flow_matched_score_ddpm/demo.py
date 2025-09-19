@@ -33,14 +33,15 @@ train_loader = DataLoader(mnist_train, batch_size=64, shuffle=True)
 # ---------------------------
 def create_unet():
     return UNet2DModel(
-        sample_size=28,
-        in_channels=1,
-        out_channels=1,
-        layers_per_block=1,
-        block_out_channels=(32, 64),  # 2 blocks
-        down_block_types=("DownBlock2D", "DownBlock2D"),
-        up_block_types=("UpBlock2D", "UpBlock2D")
+        sample_size=28,        # The input image size (MNIST = 28x28)
+        in_channels=1,         # Number of input channels (MNIST is grayscale → 1 channel)
+        out_channels=1,        # Number of output channels (we predict noise in the same shape → 1 channel)
+        layers_per_block=1,    # How many ResNet layers per block (keep small for MNIST)
+        block_out_channels=(32, 64),  # Feature map sizes at each block (like CNN filters, grows deeper)
+        down_block_types=("DownBlock2D", "DownBlock2D"),  # Downsampling path (no attention for MNIST)
+        up_block_types=("UpBlock2D", "UpBlock2D")         # Upsampling path to reconstruct
     ).to(device)
+
 
 # ---------------------------
 # 3. DDPM Setup
